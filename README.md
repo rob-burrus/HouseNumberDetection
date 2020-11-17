@@ -18,7 +18,7 @@ a.	Data Collection
 
 The SVHN dataset {1} is a real-world image dataset obtained from house numbers in Google Street View images. There are over 600,000 labeled digit images. For my purposes, the classes in this dataset (digits 0-9) needs to be augmented with an additional class: “not-digit”. This is because my sliding window technique with attempt to classify areas of an image that do not contain a digit, and therefore there needs to be an 11th class representing the absence of a digit. To create the classes of this dataset, I took the SVHN dataset in “format 1” (see below) and cropped regions of the image that don’t include digits. For each image, the red square represents the sub image collected for use as a “non-digit” class. I then took the “format 2” (images centered on individual digits) as my 0-9 digit classes. Below is a sample of the resulting combined dataset. Each image is 32x32 pixels. Note: non-digit class is labeled as ‘10’:
 
-
+![picture](report_images/Picture1.png) ![picture](report_images/Picture2.png)
      
 
 The following is the breakdown of how many image-label pairs were split into training / validation / testing:
@@ -28,6 +28,7 @@ Testing: 259,984
 
 Below is the class distribution for this combined dataset:
  
+![picture](report_images/Picture3.png)
 
 b.	CNN Architecture
 
@@ -93,18 +94,21 @@ VGG random weights	96.59%	96.25%	96.62%
 VGG imagenet weights	97.65%	98.31%	97.93%
 
 Below is the training and validation accuracy / loss over 20 epochs of training. 
-  
+
+![picture](report_images/Picture4.png) ![picture](report_images/Picture5.png)
 
 Pipeline performance:
 The overall performance of the pipeline is hard to compare against public data, given that pipeline runs relatively slowly compared to the CNN model classifier by itself and is therefore hard to run large tests and analyze statistically. Instead of a public dataset, I have collected sample images and sample videos and have evaluated my entire pipeline on these images. The performance of the pipeline is good, though some missed detections occur, and some false detections remain. The two main challenges of the pipeline implementation were optimizing for runtime, and removing false positive detections. As discussed previously, to address these concerns I have smoothed the images, implemented a per-class non-maxima suppression algorithm, and an additional algorithm the removes detection that are fully contained within other detections. The result is a system that performs well, though leaves much room for improvement. 
 
 Example results from pipeline (note: these are images 1-4 that run.py generates)  
   
-  
+![picture](report_images/Picture6.png) ![picture](report_images/Picture7.png)
+
+![picture](report_images/Picture8.png) ![picture](report_images/Picture9.png)
 
 The most notable failures with this pipeline are the false detections. There are some cases where there is genuine ambiguity as to whether the image contains a digit. Ambiguity such that, without the surrounding image context, it could very easily fool a human as well. This issue is part of what makes this task so difficult. False detections on ‘1s’ were particularly tricky, and because of the abundance of straight vertical edges that can easily be confused for “1”. In other cases, a human could easily tell the image window is not a digit, but it is understandable how the computer is fooled by the vague look-a-like. False detection examples below in order – 2, 7, 7:
 
-    
+![picture](report_images/Picture10.png) ![picture](report_images/Picture11.png) ![picture](report_images/Picture12.png)
 
 Discussion and Improvements:
 For the cases where the pipeline is fooled by a look-a-like, more training data would be needed. Indeed, it would be wise to actually take some of these digit look-a-likes that the network has falsely detected and add them to the non-digit class. To collect such a look-a-like dataset, I could set the detection confidence minimum threshold to 0%, and maximum confidence threshold to 60%, and run the pipeline on videos and images. This would yield images that were not confidently classified as digits, though probably look like digits. Training on these non-digit images would make the pipeline more robust.
